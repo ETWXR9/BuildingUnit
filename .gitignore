@@ -1,0 +1,18 @@
+/.idea/
+/shelf/
+/workspace.xml
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+# https://github.com/takari/maven-wrapper#usage-without-binary-jar
+.mvn/wrapper/maven-wrapper.jar
+/BuildingUnit.iml
+/out/artifacts/BuildingUnit_jar/BuildingUnit.jar
+/src/test/java/org/etwxr9/buildingunit/MainTest.java
+/src/main/java/META-INF/MANIFEST.MF
