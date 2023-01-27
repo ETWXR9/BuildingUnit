@@ -42,9 +42,9 @@ public class BuildingUnitAPI {
 
     /**
      * 取得建筑粘贴的目标区域信息
-     * @param location
-     * @param name
-     * @param rotate
+     * @param location 源点位置
+     * @param name 建筑名称
+     * @param rotate 90度逆时针旋转次数
      * @return
      */
     public static CuboidRegion getPasteRegion(Location location, String name, int rotate) {
@@ -62,11 +62,11 @@ public class BuildingUnitAPI {
     }
 
     /**
-     * 粘贴模板建筑
+     * 粘贴建筑
      *
-     * @param oriLoc 投影源点所在位置
-     * @param name
-     * @param rotate
+     * @param oriLoc 投影源点位置
+     * @param name 建筑名称
+     * @param rotate 90度逆时针旋转次数
      * @return
      */
     public static UnitInfo pasteUnit(Location oriLoc, String name, int rotate) {
@@ -114,7 +114,7 @@ public class BuildingUnitAPI {
     }
 
     /**
-     * 删除Unit并清除对应区域方块
+     * 删除建筑并清除对应区域方块
      * @param unitInfo
      */
     public static void deleteUnit(UnitInfo unitInfo) {
@@ -180,7 +180,7 @@ public class BuildingUnitAPI {
     }
 
     /**
-     * 根据uuid取得unit
+     * 根据uuid取得建筑信息
      * @param uuid
      * @return
      */
@@ -189,7 +189,7 @@ public class BuildingUnitAPI {
     }
 
     /**
-     * 根据名称取得单元信息
+     * 根据名称取得建筑信息
      * @param name
      * @return
      */
