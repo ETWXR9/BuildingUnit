@@ -1,0 +1,10 @@
+  name: BuildingUnit
+  main: org.etwxr9.buildingunit.Main
+  version: 1.0.0
+  api-version: 1.18
+  depend: [FastAsyncWorldEdit]
+
+  commands:
+    bu:
+      description: bu
+      usage: /bu
