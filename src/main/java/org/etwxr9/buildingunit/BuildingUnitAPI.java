@@ -6,7 +6,8 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.*;
+import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
@@ -23,7 +24,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 import org.etwxr9.buildingunit.event.OnPasteEvent;
 import org.etwxr9.buildingunit.event.OnSaveEvent;
 import xyz.xenondevs.particle.ParticleBuilder;
@@ -77,8 +77,6 @@ public class BuildingUnitAPI {
         try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder().world(world).build()) {
             var ch = new ClipboardHolder(clipboard);//创建了一个clipboard的holder实例
             ch.setTransform(ch.getTransform().combine(new AffineTransform().rotateY(rotate * 90)));//旋转指定次数
-            var minPos = clipboard.getRegion().getMinimumPoint();
-            var maxPos = clipboard.getRegion().getMaximumPoint();
             BlockVector3 clipboardOffset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
             Vector3 realTo = blockVector3.toVector3().add(ch.getTransform().apply(clipboardOffset.toVector3()));
             Vector3 max = realTo.add(ch.getTransform().apply(clipboard.getRegion().getMaximumPoint().subtract(clipboard.getRegion().getMinimumPoint()).toVector3()));
