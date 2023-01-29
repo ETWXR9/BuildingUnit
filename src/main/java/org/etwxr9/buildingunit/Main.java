@@ -41,12 +41,12 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         i = this;
-        readUnitInfo();
-        readClipboards();
         getLogger().info("onEnable is called!");
         File dataFolder = getDataFolder();
         var files = getDataFolder().listFiles();
         if (!dataFolder.exists()) dataFolder.mkdirs();
+        readUnitInfo();
+        readClipboards();
         this.getCommand("bu").setExecutor(new BUCommand());
     }
 
@@ -60,10 +60,11 @@ public class Main extends JavaPlugin {
         //读取unitInfo
         Gson gson = new Gson();
         unitInfos = new ArrayList<UnitInfo>();
-        if(!Path.of(getDataFolder() + "/Units.json").toFile().exists()){
+        if (!Path.of(getDataFolder() + "/Units.json").toFile().exists()) {
             SaveUnitInfo();
         }
-        Type unitsType = new TypeToken<ArrayList<UnitInfo>>(){}.getType();
+        Type unitsType = new TypeToken<ArrayList<UnitInfo>>() {
+        }.getType();
         try {
             unitInfos = gson.fromJson(Files.readString(Path.of(getDataFolder() + "/Units.json")), unitsType);
         } catch (IOException e) {
@@ -71,11 +72,14 @@ public class Main extends JavaPlugin {
         }
     }
 
-
     private void readClipboards() {
         clipboards = new HashMap<>();
         try {
-            Files.list(Path.of(getDataFolder() + "/Schematic")).forEach(path -> {
+            File dataFolder = getDataFolder();
+            var files = getDataFolder().listFiles();
+            var schePath = Path.of(getDataFolder() + "/Schematic");
+            if (!Files.exists(schePath)) schePath.toFile().mkdirs();
+            Files.list(schePath).forEach(path -> {
                 if (!path.toString().endsWith(".sche")) return;
                 ClipboardFormat clipboardFormat = ClipboardFormats.findByFile(path.toFile());
                 if (clipboardFormat == null) return;
