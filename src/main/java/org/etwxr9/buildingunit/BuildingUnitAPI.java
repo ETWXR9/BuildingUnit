@@ -35,22 +35,28 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 public class BuildingUnitAPI {
 
+
+    public static HashMap<String, Clipboard> getAllSchematics(){
+        return BuildingUnitMain.i.getClipboards();
+    }
+
     /**
      * 取得建筑粘贴的目标区域信息
      * @param location 源点位置
-     * @param name 建筑名称
-     * @param rotate 90度逆时针旋转次数
+     * @param name     建筑名称
+     * @param rotate   90度逆时针旋转次数
      * @return
      */
     public static CuboidRegion getPasteRegion(Location location, String name, int rotate) {
         BlockVector3 to = BukkitAdapter.asBlockVector(location);
         World world = BukkitAdapter.adapt(location.getWorld());
-        var clipboard = Main.i.getClipboards().get(name);
+        var clipboard = BuildingUnitMain.i.getClipboards().get(name);
         if (clipboard == null) return null;
         var holder = new ClipboardHolder(clipboard);
         holder.setTransform(holder.getTransform().combine(new AffineTransform().rotateY(rotate * 90)));
@@ -70,7 +76,8 @@ public class BuildingUnitAPI {
      * @return
      */
     public static UnitInfo pasteUnit(Location oriLoc, String name, int rotate) {
-        Clipboard clipboard = Main.i.getClipboards().get(name);
+        Clipboard clipboard = BuildingUnitMain.i.getClipboards().get(name);
+        if (clipboard == null) BuildingUnitMain.i.getLogger().warning("Schematic File " + name + " Not Found!");
         BlockVector3 blockVector3 = BukkitAdapter.asBlockVector(oriLoc);
         World world = BukkitAdapter.adapt(oriLoc.getWorld());
         //加载投影文件到reader
@@ -86,7 +93,7 @@ public class BuildingUnitAPI {
                     new Location(oriLoc.getWorld(), cr.getMaximumX(), cr.getMaximumY(), cr.getMaximumZ()));
             if (ou.size() != 0) {
                 //重叠！
-                Main.i.getLogger().info("Unit overlay! At " + oriLoc.toString());
+                BuildingUnitMain.i.getLogger().info("Unit overlay! At " + oriLoc.toString());
                 return null;
             }
             Operation operation = ch.createPaste(editSession)// Create a builder using the edit session
@@ -97,9 +104,9 @@ public class BuildingUnitAPI {
                 Operations.complete(operation); // This'll complete a operation synchronously until it's finished
                 //添加建筑信息
                 var result = new UnitInfo(name, oriLoc, rotate, UUID.randomUUID());
-                Main.i.getUnitInfos().add(result);
-                Main.i.SaveUnitInfo();
-                OnPasteEvent ope = new OnPasteEvent(clipboard, cr, name, result,oriLoc);
+                BuildingUnitMain.i.getUnitInfos().add(result);
+                BuildingUnitMain.i.SaveUnitInfo();
+                OnPasteEvent ope = new OnPasteEvent(clipboard, cr, name, result, oriLoc);
                 Bukkit.getPluginManager().callEvent(ope);
                 return result;
             } catch (WorldEditException worldEditException) {
@@ -123,8 +130,8 @@ public class BuildingUnitAPI {
         try (EditSession es = WorldEdit.getInstance().newEditSessionBuilder().world(w).build()) {
             BlockState air = BukkitAdapter.adapt(Material.AIR.createBlockData());
             es.setBlocks((Region) region, air);
-            Main.i.getUnitInfos().remove(unitInfo);
-            Main.i.SaveUnitInfo();
+            BuildingUnitMain.i.getUnitInfos().remove(unitInfo);
+            BuildingUnitMain.i.SaveUnitInfo();
         } catch (WorldEditException e) {
             e.printStackTrace();
         }
@@ -143,9 +150,9 @@ public class BuildingUnitAPI {
         World world = BukkitAdapter.adapt(min.getWorld());
         CuboidRegion region = new CuboidRegion(minBV3, maxBV3);
         BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
-        var path = Path.of(Main.i.getDataFolder() + "/Schematic/" + name + ".sche");
+        var path = Path.of(BuildingUnitMain.i.getDataFolder() + "/Schematic/" + name + ".sche");
         if (!region.contains(BukkitAdapter.asBlockVector(origin))) {
-            Main.i.getLogger().info("Saving schematic error: origin not in region");
+            BuildingUnitMain.i.getLogger().info("Saving schematic error: origin not in region");
             return;
         }
         clipboard.setOrigin(BukkitAdapter.asBlockVector(origin));
@@ -157,7 +164,7 @@ public class BuildingUnitAPI {
         try (ClipboardWriter clipboardWriter = BuiltInClipboardFormat.FAST.
                 getWriter(new FileOutputStream(path.toString()))) {
             clipboardWriter.write(clipboard);
-            Main.i.getClipboards().put(name, clipboard);
+            BuildingUnitMain.i.getClipboards().put(name, clipboard);
             OnSaveEvent ose = new OnSaveEvent(clipboard, path);
             Bukkit.getPluginManager().callEvent(ose);
         } catch (IOException e) {
@@ -171,7 +178,7 @@ public class BuildingUnitAPI {
      * @return
      */
     public static UnitInfo getUnit(Location loc) {
-        var result = Main.i.getUnitInfos().stream().
+        var result = BuildingUnitMain.i.getUnitInfos().stream().
                 filter(u -> u.getWorld() == loc.getWorld()).
                 filter(u -> u.isLocationInside(loc)).toList();
         return result.size() == 0 ? null : result.get(0);
@@ -182,8 +189,8 @@ public class BuildingUnitAPI {
      * @param uuid
      * @return
      */
-    public static UnitInfo getUnit(String uuid){
-        return Main.i.getUnitInfos().stream().filter(unitInfo -> unitInfo.getUuid().equals(uuid)).findFirst().orElse(null);
+    public static UnitInfo getUnit(String uuid) {
+        return BuildingUnitMain.i.getUnitInfos().stream().filter(unitInfo -> unitInfo.getUuid().equals(uuid)).findFirst().orElse(null);
     }
 
     /**
@@ -191,19 +198,19 @@ public class BuildingUnitAPI {
      * @param name
      * @return
      */
-    public static List<UnitInfo>getUnitsByName(String name){
-        return Main.i.getUnitInfos().stream().filter(unitInfo -> unitInfo.getName().equals(name)).toList();
+    public static List<UnitInfo> getUnitsByName(String name) {
+        return BuildingUnitMain.i.getUnitInfos().stream().filter(unitInfo -> unitInfo.getName().equals(name)).toList();
     }
 
 
     //判断指定立方体区域是否与某个unit重叠
     public static List<UnitInfo> getOverlapUnits(Location min, Location max) {
-        return Main.i.getUnitInfos().stream().filter(u -> u.getWorld() == min.getWorld()).
+        return BuildingUnitMain.i.getUnitInfos().stream().filter(u -> u.getWorld() == min.getWorld()).
                 filter(u -> u.isOverlap(min, max)).toList();
     }
     public static List<UnitInfo> getOverlapUnits(CuboidRegion cr) {
-        return  getOverlapUnits(new Location(Main.i.getServer().getWorld(cr.getWorld().getName()), cr.getMinimumX(), cr.getMinimumY(), cr.getMinimumZ()),
-                new Location(Main.i.getServer().getWorld(cr.getWorld().getName()), cr.getMaximumX(), cr.getMaximumY(), cr.getMaximumZ()));
+        return getOverlapUnits(new Location(BuildingUnitMain.i.getServer().getWorld(cr.getWorld().getName()), cr.getMinimumX(), cr.getMinimumY(), cr.getMinimumZ()),
+                new Location(BuildingUnitMain.i.getServer().getWorld(cr.getWorld().getName()), cr.getMaximumX(), cr.getMaximumY(), cr.getMaximumZ()));
     }
 
     //粒子提示相关方法
@@ -260,6 +267,7 @@ public class BuildingUnitAPI {
         var task = TaskManager.startTargetedTask(packets, tickInterval, playerList); // Start a new task and return the id
         var br = new BukkitRunnable() {
             int count = 0;
+
             @Override
             public void run() {
                 if (count >= displayTimeNumber) {
@@ -268,7 +276,7 @@ public class BuildingUnitAPI {
                 }
                 count++;
             }
-        }.runTaskTimer(Main.i, 0, tickInterval);
+        }.runTaskTimer(BuildingUnitMain.i, 0, tickInterval);
     }
 
     public static void showSchematicParticle(Location loc, List<Player> playerList, String name,
@@ -277,9 +285,9 @@ public class BuildingUnitAPI {
 
         var vMin = cr.getMinimumPoint();
         var vMax = cr.getMaximumPoint();
-        Main.i.getLogger().info("ShowSchematicParticle");
-        Main.i.getLogger().info(vMin.toString());
-        Main.i.getLogger().info(vMax.toString());
+        BuildingUnitMain.i.getLogger().info("ShowSchematicParticle");
+        BuildingUnitMain.i.getLogger().info(vMin.toString());
+        BuildingUnitMain.i.getLogger().info(vMax.toString());
         showCubeParticle(new Location(loc.getWorld(), vMin.getBlockX(), vMin.getBlockY(), vMin.getBlockZ()),
                 new Location(loc.getWorld(), vMax.getBlockX(), vMax.getBlockY(), vMax.getBlockZ()),
                 playerList, r, g, b, tickInterval, displayTimeNumber);

@@ -12,7 +12,7 @@ import java.util.UUID;
 
 //对于每个粘贴到世界中的建筑单元实例，保存其信息
 //包括：对应的模板名称String、原点坐标Location、旋转次数int
-//API包括：取得基本属性、取得对应模板实例、取得最小最大点、判断内部点、取得内部玩家、打印信息、
+//API包括：取得基本属性、取得最小最大点、判断内部点、取得内部玩家、打印信息、
 public class UnitInfo {
     //取得基本属性
     private String name;
@@ -111,7 +111,7 @@ public class UnitInfo {
      * @return
      */
     public Location getOriginLocation() {
-        return new Location(Main.i.getServer().getWorld(world), x, y, z);
+        return new Location(BuildingUnitMain.i.getServer().getWorld(world), x, y, z);
     }
 
     public int getRotate() {
@@ -123,7 +123,7 @@ public class UnitInfo {
     }
 
     public World getWorld() {
-        return Main.i.getServer().getWorld(world);
+        return BuildingUnitMain.i.getServer().getWorld(world);
     }
 
     public void showInfoMsg(Player p) {

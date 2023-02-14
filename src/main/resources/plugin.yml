@@ -1,5 +1,5 @@
   name: BuildingUnit
-  main: org.etwxr9.buildingunit.Main
+  main: org.etwxr9.buildingunit.BuildingUnitMain
   version: 1.0.0
   api-version: 1.18
   depend: [FastAsyncWorldEdit]

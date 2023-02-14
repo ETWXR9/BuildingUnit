@@ -6,7 +6,7 @@
 
     <groupId>org.etwxr9</groupId>
     <artifactId>BuildingUnit</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <repositories>
         <repository>
             <id>papermc</id>
@@ -64,4 +64,38 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
+        <pluginManagement>
+
+            <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <!-- 绑定source插件到Maven的生命周期,并在生命周期后执行绑定的source的goal -->
+                    <executions>
+                        <execution>
+                            <!-- 绑定source插件到Maven的生命周期 -->
+                            <phase>package</phase>
+                            <!--在生命周期后执行绑定的source插件的goals -->
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <configuration>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class Main extends JavaPlugin {
+public class BuildingUnitMain extends JavaPlugin {
 
-    public static Main i;
+    public static BuildingUnitMain i;
 
     public List<UnitInfo> getUnitInfos() {
         return unitInfos;
@@ -80,7 +80,6 @@ public class Main extends JavaPlugin {
             var schePath = Path.of(getDataFolder() + "/Schematic");
             if (!Files.exists(schePath)) schePath.toFile().mkdirs();
             Files.list(schePath).forEach(path -> {
-                if (!path.toString().endsWith(".sche")) return;
                 ClipboardFormat clipboardFormat = ClipboardFormats.findByFile(path.toFile());
                 if (clipboardFormat == null) return;
                 Clipboard clipboard;
@@ -102,7 +101,7 @@ public class Main extends JavaPlugin {
     public void SaveUnitInfo() {
         Gson gson = new Gson();
         try {
-            Files.writeString(Path.of(getDataFolder() + "/Units.json"), gson.toJson(Main.i.getUnitInfos()));
+            Files.writeString(Path.of(getDataFolder() + "/Units.json"), gson.toJson(BuildingUnitMain.i.getUnitInfos()));
         } catch (IOException e) {
             e.printStackTrace();
         }
