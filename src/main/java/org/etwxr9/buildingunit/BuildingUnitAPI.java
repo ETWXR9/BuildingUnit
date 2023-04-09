@@ -42,12 +42,13 @@ import java.util.UUID;
 public class BuildingUnitAPI {
 
 
-    public static HashMap<String, Clipboard> getAllSchematics(){
+    public static HashMap<String, Clipboard> getAllSchematics() {
         return BuildingUnitMain.i.getClipboards();
     }
 
     /**
      * 取得建筑粘贴的目标区域信息
+     *
      * @param location 源点位置
      * @param name     建筑名称
      * @param rotate   90度逆时针旋转次数
@@ -71,7 +72,7 @@ public class BuildingUnitAPI {
      * 粘贴建筑
      *
      * @param oriLoc 投影源点位置
-     * @param name 建筑名称
+     * @param name   建筑名称
      * @param rotate 90度逆时针旋转次数
      * @return
      */
@@ -119,16 +120,24 @@ public class BuildingUnitAPI {
     }
 
     /**
-     * 删除建筑并清除对应区域方块
-     * @param unitInfo
+     * 删除建筑并清除对应区域方块和非玩家实体
+     *
+     * @param unitInfo    建筑信息
+     * @param clearEntity 是否清除实体
      */
-    public static void deleteUnit(UnitInfo unitInfo) {
+    public static void deleteUnit(UnitInfo unitInfo, boolean clearEntity) {
         var bv3Min = BukkitAdapter.asBlockVector(unitInfo.getMinLocation());
         var bv3Max = BukkitAdapter.asBlockVector(unitInfo.getMaxLocation());
         var w = BukkitAdapter.adapt(unitInfo.getWorld());
         CuboidRegion region = new CuboidRegion(w, bv3Min, bv3Max);
         try (EditSession es = WorldEdit.getInstance().newEditSessionBuilder().world(w).build()) {
             BlockState air = BukkitAdapter.adapt(Material.AIR.createBlockData());
+            //清除非玩家实体
+            if (clearEntity) es.getEntities(region).forEach(entity -> {
+                if (!(entity instanceof Player)) {
+                    entity.remove();
+                }
+            });
             es.setBlocks((Region) region, air);
             BuildingUnitMain.i.getUnitInfos().remove(unitInfo);
             BuildingUnitMain.i.SaveUnitInfo();
@@ -139,6 +148,7 @@ public class BuildingUnitAPI {
 
     /**
      * 保存投影文件
+     *
      * @param min
      * @param max
      * @param name
@@ -174,6 +184,7 @@ public class BuildingUnitAPI {
 
     /**
      * 取得指定位置的建筑
+     *
      * @param loc
      * @return
      */
@@ -186,6 +197,7 @@ public class BuildingUnitAPI {
 
     /**
      * 根据uuid取得建筑信息
+     *
      * @param uuid
      * @return
      */
@@ -195,6 +207,7 @@ public class BuildingUnitAPI {
 
     /**
      * 根据名称取得建筑信息
+     *
      * @param name
      * @return
      */
@@ -208,6 +221,7 @@ public class BuildingUnitAPI {
         return BuildingUnitMain.i.getUnitInfos().stream().filter(u -> u.getWorld() == min.getWorld()).
                 filter(u -> u.isOverlap(min, max)).toList();
     }
+
     public static List<UnitInfo> getOverlapUnits(CuboidRegion cr) {
         return getOverlapUnits(new Location(BuildingUnitMain.i.getServer().getWorld(cr.getWorld().getName()), cr.getMinimumX(), cr.getMinimumY(), cr.getMinimumZ()),
                 new Location(BuildingUnitMain.i.getServer().getWorld(cr.getWorld().getName()), cr.getMaximumX(), cr.getMaximumY(), cr.getMaximumZ()));
