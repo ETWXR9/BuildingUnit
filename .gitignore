@@ -1,4 +1,6 @@
 /.idea/
+/.vscode/
+/out/
 /shelf/
 /workspace.xml
 target/
@@ -10,9 +12,9 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-# https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
 /BuildingUnit.iml
 /out/artifacts/BuildingUnit_jar/BuildingUnit.jar
 /src/test/java/org/etwxr9/buildingunit/MainTest.java
 /src/main/java/META-INF/MANIFEST.MF
+.gitignore
