@@ -3,13 +3,10 @@ package org.etwxr9.buildingunit.event;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import org.bukkit.Location;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.etwxr9.buildingunit.UnitInfo;
 import org.jetbrains.annotations.NotNull;
-
-import java.nio.file.Path;
 
 public class OnPasteEvent extends Event{
     private static final HandlerList HANDLERS = new HandlerList();

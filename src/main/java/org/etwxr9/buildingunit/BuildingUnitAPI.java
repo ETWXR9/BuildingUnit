@@ -30,7 +30,6 @@ import org.etwxr9.buildingunit.event.OnSaveEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -55,14 +54,19 @@ public class BuildingUnitAPI {
         var clipboard = BuildingUnitMain.i.getClipboards().get(name);
         if (clipboard == null)
             return null;
-        var holder = new ClipboardHolder(clipboard);
-        holder.setTransform(holder.getTransform().combine(new AffineTransform().rotateY(rotate * 90)));
-        var region = clipboard.getRegion();
-        BlockVector3 clipboardOffset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
-        Vector3 realTo = to.toVector3().add(holder.getTransform().apply(clipboardOffset.toVector3()));
-        Vector3 max = realTo.add(
-                holder.getTransform().apply(region.getMaximumPoint().subtract(region.getMinimumPoint()).toVector3()));
-        return new CuboidRegion(world, realTo.toBlockPoint(), max.toBlockPoint());
+        try (var holder = new ClipboardHolder(clipboard)) {
+            holder.setTransform(holder.getTransform().combine(new AffineTransform().rotateY(rotate * 90)));
+            var region = clipboard.getRegion();
+            BlockVector3 clipboardOffset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
+            Vector3 realTo = to.toVector3().add(holder.getTransform().apply(clipboardOffset.toVector3()));
+            Vector3 max = realTo.add(
+                    holder.getTransform()
+                            .apply(region.getMaximumPoint().subtract(region.getMinimumPoint()).toVector3()));
+            return new CuboidRegion(world, realTo.toBlockPoint(), max.toBlockPoint());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -94,12 +98,14 @@ public class BuildingUnitAPI {
             if (ou.size() != 0) {
                 // 重叠！
                 BuildingUnitMain.i.getLogger().info("Unit overlay! At " + oriLoc.toString());
+                ch.close();
                 return null;
             }
             Operation operation = ch.createPaste(editSession)// Create a builder using the edit session
                     .to(blockVector3) // Set where you want the paste to go
                     .ignoreAirBlocks(false) // Tell world edit not to paste air blocks (true/false)
                     .build(); // Build the operation
+            ch.close();
             try {
                 Operations.complete(operation); // This'll complete a operation synchronously until it's finished
                 // 添加建筑信息
@@ -163,6 +169,7 @@ public class BuildingUnitAPI {
         var path = Path.of(BuildingUnitMain.i.getDataFolder() + "/Schematic/" + name + ".sche");
         if (!region.contains(BukkitAdapter.asBlockVector(origin))) {
             BuildingUnitMain.i.getLogger().info("Saving schematic error: origin not in region");
+            clipboard.close();
             return;
         }
         clipboard.setOrigin(BukkitAdapter.asBlockVector(origin));
@@ -251,13 +258,14 @@ public class BuildingUnitAPI {
         var cr = new CuboidRegion(BlockVector3.at(loc1.getBlockX(), loc1.getBlockY(), loc1.getBlockZ()),
                 BlockVector3.at(loc2.getBlockX(), loc2.getBlockY(), loc2.getBlockZ()));
         var vecMin = cr.getMinimumPoint();
-        var vecMax = cr.getMaximumPoint();
+        // var vecMax = cr.getMaximumPoint();
         var sizeX = cr.getWidth();
         var sizeY = cr.getHeight();
         var sizeZ = cr.getLength();
         // 在边缘处生成粒子
         class Task extends BukkitRunnable {
             private int count = 0;
+
             @Override
             public void run() {
                 for (int x = 0; x < sizeX; x++) {

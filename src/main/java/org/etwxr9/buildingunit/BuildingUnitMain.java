@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
 public class BuildingUnitMain extends JavaPlugin {
 
     public static BuildingUnitMain i;
@@ -30,21 +29,20 @@ public class BuildingUnitMain extends JavaPlugin {
 
     private List<UnitInfo> unitInfos;
 
-
     public HashMap<String, Clipboard> getClipboards() {
         return clipboards;
     }
 
     private HashMap<String, Clipboard> clipboards;
 
-
     @Override
     public void onEnable() {
         i = this;
         getLogger().info("onEnable is called!");
         File dataFolder = getDataFolder();
-        var files = getDataFolder().listFiles();
-        if (!dataFolder.exists()) dataFolder.mkdirs();
+        // var files = getDataFolder().listFiles();
+        if (!dataFolder.exists())
+            dataFolder.mkdirs();
         readUnitInfo();
         readClipboards();
         this.getCommand("bu").setExecutor(new BUCommand());
@@ -55,9 +53,8 @@ public class BuildingUnitMain extends JavaPlugin {
         getLogger().info("onDisable is called!");
     }
 
-
     private void readUnitInfo() {
-        //读取unitInfo
+        // 读取unitInfo
         Gson gson = new Gson();
         unitInfos = new ArrayList<UnitInfo>();
         if (!Path.of(getDataFolder() + "/Units.json").toFile().exists()) {
@@ -75,17 +72,20 @@ public class BuildingUnitMain extends JavaPlugin {
     private void readClipboards() {
         clipboards = new HashMap<>();
         try {
-            File dataFolder = getDataFolder();
-            var files = getDataFolder().listFiles();
+            // File dataFolder = getDataFolder();
+            // var files = getDataFolder().listFiles();
             var schePath = Path.of(getDataFolder() + "/Schematic");
-            if (!Files.exists(schePath)) schePath.toFile().mkdirs();
+            if (!Files.exists(schePath))
+                schePath.toFile().mkdirs();
             Files.list(schePath).forEach(path -> {
                 ClipboardFormat clipboardFormat = ClipboardFormats.findByFile(path.toFile());
-                if (clipboardFormat == null) return;
+                if (clipboardFormat == null)
+                    return;
                 Clipboard clipboard;
                 try (ClipboardReader clipboardReader = clipboardFormat.getReader(new FileInputStream(path.toFile()))) {
                     clipboard = clipboardReader.read();
-                    var name = path.getFileName().toString().substring(0, path.getFileName().toString().lastIndexOf("."));
+                    var name = path.getFileName().toString().substring(0,
+                            path.getFileName().toString().lastIndexOf("."));
                     clipboards.put(name, clipboard);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -106,6 +106,5 @@ public class BuildingUnitMain extends JavaPlugin {
             e.printStackTrace();
         }
     }
-
 
 }

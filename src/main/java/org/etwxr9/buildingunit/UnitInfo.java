@@ -74,7 +74,7 @@ public class UnitInfo {
 
     public List<Player> getEveryoneInside() {
         List<Player> result = new ArrayList<Player>();
-        var cr = getCr();
+        // var cr = getCr();
         getWorld().getPlayers().forEach(p -> {
             if (isLocationInside(p.getLocation()))
                 result.add(p);

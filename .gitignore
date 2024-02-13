@@ -1,9 +1,17 @@
-/.idea/
-/.vscode/
-/out/
-/shelf/
-/workspace.xml
+# Maven build directory
 target/
+
+# IDE files
+.idea/
+.vscode/
+
+# gitignore
+.gitignore
+
+# Compiled Java classes
+*.class
+
+# Maven project files
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -11,10 +19,14 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
-.mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
-/BuildingUnit.iml
-/out/artifacts/BuildingUnit_jar/BuildingUnit.jar
-/src/test/java/org/etwxr9/buildingunit/MainTest.java
-/src/main/java/META-INF/MANIFEST.MF
-.gitignore
+
+# Eclipse specific files
+.classpath
+.project
+.settings/
+
+# IntelliJ specific files
+*.iml
+*.ipr
+*.iws
+out/

@@ -1,7 +1,6 @@
 package org.etwxr9.buildingunit.event;
 
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
