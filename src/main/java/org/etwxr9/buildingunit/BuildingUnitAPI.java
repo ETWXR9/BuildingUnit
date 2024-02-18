@@ -84,8 +84,9 @@ public class BuildingUnitAPI {
         BlockVector3 blockVector3 = BukkitAdapter.asBlockVector(oriLoc);
         World world = BukkitAdapter.adapt(oriLoc.getWorld());
         // 加载投影文件到reader
-        try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder().world(world).build()) {
-            var ch = new ClipboardHolder(clipboard);// 创建了一个clipboard的holder实例
+        try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder().world(world).build();
+                var ch = new ClipboardHolder(clipboard);) {
+            // 创建了一个clipboard的holder实例
             ch.setTransform(ch.getTransform().combine(new AffineTransform().rotateY(rotate * 90)));// 旋转指定次数
             BlockVector3 clipboardOffset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
             Vector3 realTo = blockVector3.toVector3().add(ch.getTransform().apply(clipboardOffset.toVector3()));
@@ -98,14 +99,12 @@ public class BuildingUnitAPI {
             if (ou.size() != 0) {
                 // 重叠！
                 BuildingUnitMain.i.getLogger().info("Unit overlay! At " + oriLoc.toString());
-                ch.close();
                 return null;
             }
             Operation operation = ch.createPaste(editSession)// Create a builder using the edit session
                     .to(blockVector3) // Set where you want the paste to go
                     .ignoreAirBlocks(false) // Tell world edit not to paste air blocks (true/false)
                     .build(); // Build the operation
-            ch.close();
             try {
                 Operations.complete(operation); // This'll complete a operation synchronously until it's finished
                 // 添加建筑信息
