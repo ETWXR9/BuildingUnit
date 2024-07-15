@@ -1,3 +1,6 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "yaml.schemas": {
+        "https://json.schemastore.org/bukkit-plugin.json": "file:///e%3A/Work/SpigotDev/PluginDev/BuildingUnit/src/main/resources/plugin.yml"
+    }
 }

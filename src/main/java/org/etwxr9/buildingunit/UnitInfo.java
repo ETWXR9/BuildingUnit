@@ -14,7 +14,7 @@ import java.util.UUID;
 //包括：对应的模板名称String、原点坐标Location、旋转次数int
 //API包括：取得基本属性、取得最小最大点、判断内部点、取得内部玩家、打印信息、
 public class UnitInfo {
-    //取得基本属性
+    // 取得基本属性
     private String name;
     private String world;
     private int x;
@@ -54,11 +54,11 @@ public class UnitInfo {
      * @return
      */
     public boolean isOverlap(Location min, Location max) {
-        var locMax = getMaxLocation();
-        var locMin = getMinLocation();
-        return (min.getBlockX() <= locMax.getBlockX() && max.getBlockX() >= locMin.getBlockX()) &&
-                (min.getBlockY() <= locMax.getBlockY() && max.getBlockY() >= locMin.getBlockX()) &&
-                (min.getBlockZ() <= locMax.getBlockZ() && max.getBlockZ() >= locMin.getBlockZ());
+        var max2 = getMaxLocation();
+        var min2 = getMinLocation();
+        return !(min.getBlockX() > max2.getBlockX() || max.getBlockX() < min2.getBlockX() ||
+                min.getBlockY() > max2.getBlockY() || max.getBlockY() < min2.getBlockY() ||
+                min.getBlockZ() > max2.getBlockZ() || max.getBlockZ() < min2.getBlockZ());
     }
 
     /**
@@ -81,7 +81,6 @@ public class UnitInfo {
         });
         return result;
     }
-
 
     /**
      * 取得最小角(西北下)的坐标
@@ -129,10 +128,11 @@ public class UnitInfo {
     public void showInfoMsg(Player p) {
         p.sendMessage("========UnitInfo Start========");
         p.sendMessage("name: " + name);
-        p.sendMessage(String.format("Location Min: (%d,%d,%d)", getMinLocation().getBlockX(), getMinLocation().getBlockY(), getMinLocation().getBlockZ()));
-        p.sendMessage(String.format("Location Max: (%d,%d,%d)", getMaxLocation().getBlockX(), getMaxLocation().getBlockY(), getMaxLocation().getBlockZ()));
+        p.sendMessage(String.format("Location Min: (%d,%d,%d)", getMinLocation().getBlockX(),
+                getMinLocation().getBlockY(), getMinLocation().getBlockZ()));
+        p.sendMessage(String.format("Location Max: (%d,%d,%d)", getMaxLocation().getBlockX(),
+                getMaxLocation().getBlockY(), getMaxLocation().getBlockZ()));
         p.sendMessage("========UnitInfo End========");
     }
-
 
 }
