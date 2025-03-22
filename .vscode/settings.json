@@ -2,5 +2,6 @@
     "java.configuration.updateBuildConfiguration": "interactive",
     "yaml.schemas": {
         "https://json.schemastore.org/bukkit-plugin.json": "file:///e%3A/Work/SpigotDev/PluginDev/BuildingUnit/src/main/resources/plugin.yml"
-    }
+    },
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable"
 }

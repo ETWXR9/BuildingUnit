@@ -22,6 +22,7 @@ import com.sk89q.worldedit.world.block.BlockState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.etwxr9.buildingunit.event.OnPasteEvent;
@@ -30,15 +31,21 @@ import org.etwxr9.buildingunit.event.OnSaveEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class BuildingUnitAPI {
 
-    public static HashMap<String, Clipboard> getAllSchematics() {
-        return BuildingUnitMain.i.getClipboards();
+    public static boolean isSchemaExist(String name) {
+        return BuildingUnitMain.i.getClipboards().containsKey(name);
+    }
+
+    /**
+     * 保存建筑信息
+     */
+    public static void saveUnitInfo() {
+        BuildingUnitMain.i.SaveUnitInfo();
     }
 
     /**
@@ -105,7 +112,6 @@ public class BuildingUnitAPI {
                 // 添加建筑信息
                 var result = new UnitInfo(name, oriLoc, rotate, UUID.randomUUID());
                 BuildingUnitMain.i.getUnitInfos().add(result);
-                BuildingUnitMain.i.SaveUnitInfo();
                 OnPasteEvent ope = new OnPasteEvent(clipboard, cr, name, result, oriLoc);
                 Bukkit.getPluginManager().callEvent(ope);
                 return result;
@@ -140,7 +146,6 @@ public class BuildingUnitAPI {
                 });
             es.setBlocks((Region) region, air);
             BuildingUnitMain.i.getUnitInfos().remove(unitInfo);
-            BuildingUnitMain.i.SaveUnitInfo();
         } catch (WorldEditException e) {
             e.printStackTrace();
         }
