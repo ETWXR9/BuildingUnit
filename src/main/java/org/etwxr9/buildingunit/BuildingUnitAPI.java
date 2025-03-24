@@ -41,6 +41,10 @@ public class BuildingUnitAPI {
         return BuildingUnitMain.i.getClipboards();
     }
 
+    public static boolean isSchematicExist(String name) {
+        return BuildingUnitMain.i.getClipboards().containsKey(name);
+    }
+
     /**
      * 取得建筑粘贴的目标区域信息
      *
@@ -268,7 +272,7 @@ public class BuildingUnitAPI {
                             var zEdge = z == 0 || z == (sizeZ - 1);
                             // 筛选立方体的边
                             if (xEdge ^ yEdge ? zEdge : xEdge) {
-                                loc1.getWorld().spawnParticle(org.bukkit.Particle.REDSTONE,
+                                loc1.getWorld().spawnParticle(org.bukkit.Particle.DUST,
                                         x + vecMin.getBlockX() + 0.5,
                                         y + vecMin.getBlockY() + 0.5,
                                         z + vecMin.getBlockZ() + 0.5,

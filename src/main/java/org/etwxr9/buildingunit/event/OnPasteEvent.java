@@ -7,11 +7,10 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.etwxr9.buildingunit.UnitInfo;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
-public class OnPasteEvent extends Event{
+public class OnPasteEvent extends Event {
     private static final HandlerList HANDLERS = new HandlerList();
 
     public Clipboard getClipboard() {
@@ -53,7 +52,6 @@ public class OnPasteEvent extends Event{
         return HANDLERS;
     }
 
-    @NotNull
     @Override
     public HandlerList getHandlers() {
         return HANDLERS;

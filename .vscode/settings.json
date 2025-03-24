@@ -1,6 +1,7 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.configuration.updateBuildConfiguration": "automatic",
     "yaml.schemas": {
         "https://json.schemastore.org/bukkit-plugin.json": "file:///e%3A/Work/SpigotDev/PluginDev/BuildingUnit/src/main/resources/plugin.yml"
-    }
+    },
+    "java.compile.nullAnalysis.mode": "disabled"
 }

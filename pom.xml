@@ -6,7 +6,7 @@
 
     <groupId>org.etwxr9</groupId>
     <artifactId>BuildingUnit</artifactId>
-    <version>v1.20.4-1.0</version>
+    <version>v1.21.1-1.0</version>
     <repositories>
         <repository>
             <id>papermc</id>
@@ -16,19 +16,23 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>enginehub-maven</id>
+            <url>https://maven.enginehub.org/repo/</url>
+        </repository>
     </repositories>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.intellectualsites.bom</groupId>
                 <artifactId>bom-newest</artifactId>
-                <version>1.41</version>
+                <version>1.52</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -54,13 +58,13 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.20.4-R0.1-SNAPSHOT</version>
+            <version>1.21.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.0-RC1</version>
+            <version>5.12.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
