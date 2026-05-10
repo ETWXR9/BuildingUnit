@@ -1,4 +1,5 @@
 package org.etwxr9.buildingunit.commands;
+
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -107,12 +108,14 @@ public class BUCommand implements CommandExecutor {
         boolean ignoreAir = args.length >= 4 && Boolean.parseBoolean(args[3]);
         boolean confirm = args.length == 5 && "confirm".equalsIgnoreCase(args[4]);
         if (!confirm) {
-            service.showSchematicParticle(player.getLocation().toBlockLocation(), List.of(player), args[1], 255, 0, 0, 20, 10, rotate);
+            service.showSchematicParticle(player.getLocation().toBlockLocation(), List.of(player), args[1], 255, 0, 0,
+                    20, 10, rotate);
             sender.sendMessage("[BuildingUnit] 已显示粘贴预览。追加 confirm 才会真正粘贴。");
             return true;
         }
         UnitInfo unitInfo = service.pasteUnit(player.getLocation().toBlockLocation(), args[1], rotate, ignoreAir);
-        sender.sendMessage(unitInfo == null ? "[BuildingUnit] 粘贴失败，可能是模板不存在、区域重叠或被事件取消。" : "[BuildingUnit] 粘贴成功，UUID: " + unitInfo.getUuid());
+        sender.sendMessage(unitInfo == null ? "[BuildingUnit] 粘贴失败，可能是模板不存在、区域重叠或被事件取消。"
+                : "[BuildingUnit] 粘贴成功，UUID: " + unitInfo.getUuid());
         return true;
     }
 
@@ -126,7 +129,8 @@ public class BUCommand implements CommandExecutor {
         }
         try {
             int rotate = Integer.parseInt(args[2]);
-            service.showSchematicParticle(player.getLocation().toBlockLocation(), List.of(player), args[1], 255, 0, 0, 20, 10, rotate);
+            service.showSchematicParticle(player.getLocation().toBlockLocation(), List.of(player), args[1], 255, 0, 0,
+                    20, 10, rotate);
             sender.sendMessage("[BuildingUnit] 已显示粘贴预览。");
         } catch (NumberFormatException e) {
             sender.sendMessage("[BuildingUnit] rotate 必须是整数。");
@@ -179,7 +183,8 @@ public class BUCommand implements CommandExecutor {
     }
 
     private boolean sendUsage(CommandSender sender) {
-        sender.sendMessage("/bu save <name> <sizeX> <sizeY> <sizeZ> [originOffsetX originOffsetY originOffsetZ] [confirm]");
+        sender.sendMessage(
+                "/bu save <name> <sizeX> <sizeY> <sizeZ> [originOffsetX originOffsetY originOffsetZ] [confirm]");
         sender.sendMessage("/bu paste <name> <rotate> [ignoreAir] [confirm]");
         sender.sendMessage("/bu preview <name> <rotate>");
         sender.sendMessage("/bu delete");
