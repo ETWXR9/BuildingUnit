@@ -1,143 +1,239 @@
 package org.etwxr9.buildingunit;
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
+import org.etwxr9.buildingunit.util.ChunkKey;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Objects;
 
-//对于每个粘贴到世界中的建筑单元实例，保存其信息
-//包括：对应的模板名称String、原点坐标Location、旋转次数int
-//API包括：取得基本属性、取得最小最大点、判断内部点、取得内部玩家、打印信息、
 public class UnitInfo {
-    // 取得基本属性
-    private String name;
-    private String world;
-    private int x;
-    private int y;
-    private int z;
-    private int rotate;
-    private String uuid;
-    private transient CuboidRegion cr;
 
-    public UnitInfo(String name, Location originLocation, int rotate, UUID uuid) {
-        this.name = name;
-        world = originLocation.getWorld().getName();
-        x = originLocation.getBlockX();
-        y = originLocation.getBlockY();
-        z = originLocation.getBlockZ();
-        this.rotate = rotate;
-        this.uuid = uuid.toString();
-        cr = BuildingUnitAPI.getPasteRegionCR(getOriginLocation(), name, rotate);
+    private final String schematicName;
+    private final String worldName;
+    private final int originX;
+    private final int originY;
+    private final int originZ;
+    private final int rotate;
+    private final String uuid;
+    private final int minX;
+    private final int minY;
+    private final int minZ;
+    private final int maxX;
+    private final int maxY;
+    private final int maxZ;
+    private final long createdAtEpochMilli;
+
+    public UnitInfo(
+            String schematicName,
+            String worldName,
+            int originX,
+            int originY,
+            int originZ,
+            int rotate,
+            String uuid,
+            int minX,
+            int minY,
+            int minZ,
+            int maxX,
+            int maxY,
+            int maxZ,
+            long createdAtEpochMilli) {
+        this.schematicName = schematicName;
+        this.worldName = worldName;
+        this.originX = originX;
+        this.originY = originY;
+        this.originZ = originZ;
+        this.rotate = Math.floorMod(rotate, 4);
+        this.uuid = uuid;
+        this.minX = Math.min(minX, maxX);
+        this.minY = Math.min(minY, maxY);
+        this.minZ = Math.min(minZ, maxZ);
+        this.maxX = Math.max(minX, maxX);
+        this.maxY = Math.max(minY, maxY);
+        this.maxZ = Math.max(minZ, maxZ);
+        this.createdAtEpochMilli = createdAtEpochMilli;
     }
 
-    public CuboidRegion getCr() {
-        if (cr == null) {
-            cr = BuildingUnitAPI.getPasteRegionCR(getOriginLocation(), name, rotate);
-        }
-        return cr;
+    public String getName() {
+        return schematicName;
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getSchematicName() {
+        return schematicName;
     }
 
-    /**
-     * 判断指定立方体区域是否与该unit重叠
-     *
-     * @param min
-     * @param max
-     * @return
-     */
-    public boolean isOverlap(Location min, Location max) {
-        var max2 = getMaxLocation();
-        var min2 = getMinLocation();
-        return !(min.getBlockX() > max2.getBlockX() || max.getBlockX() < min2.getBlockX() ||
-                min.getBlockY() > max2.getBlockY() || max.getBlockY() < min2.getBlockY() ||
-                min.getBlockZ() > max2.getBlockZ() || max.getBlockZ() < min2.getBlockZ());
+    public String getWorldName() {
+        return worldName;
     }
 
-    /**
-     * 判断位置是否处于该unit之中
-     *
-     * @param loc
-     * @return
-     */
-    public boolean isLocationInside(Location loc) {
-        var cr = getCr();
-        return cr.contains(BukkitAdapter.asBlockVector(loc));
+    public int getOriginX() {
+        return originX;
     }
 
-    public List<Player> getEveryoneInside() {
-        List<Player> result = new ArrayList<Player>();
-        var cr = getCr();
-        getWorld().getPlayers().forEach(p -> {
-            if (isLocationInside(p.getLocation()))
-                result.add(p);
-        });
-        return result;
+    public int getOriginY() {
+        return originY;
     }
 
-    /**
-     * 取得最小角(西北下)的坐标
-     *
-     * @return
-     */
-    public Location getMinLocation() {
-        var cr = getCr();
-        var minLoc = cr.getMinimumPoint();
-        return new Location(getWorld(), minLoc.getBlockX(), minLoc.getBlockY(), minLoc.getBlockZ());
-    }
-
-    /**
-     * 取得最大角(东南上)的坐标
-     *
-     * @return
-     */
-    public Location getMaxLocation() {
-        var cr = getCr();
-        var maxLoc = cr.getMaximumPoint();
-        return new Location(getWorld(), maxLoc.getBlockX(), maxLoc.getBlockY(), maxLoc.getBlockZ());
-    }
-
-    public BoundingBox getBoundingBox() {
-        return BoundingBox.of(getMinLocation(), getMaxLocation());
-    }
-
-    /**
-     * 取得源点坐标
-     *
-     * @return
-     */
-    public Location getOriginLocation() {
-        return new Location(BuildingUnitMain.i.getServer().getWorld(world), x, y, z);
+    public int getOriginZ() {
+        return originZ;
     }
 
     public int getRotate() {
         return rotate;
     }
 
-    public String getName() {
-        return name;
+    public String getUuid() {
+        return uuid;
+    }
+
+    public int getMinX() {
+        return minX;
+    }
+
+    public int getMinY() {
+        return minY;
+    }
+
+    public int getMinZ() {
+        return minZ;
+    }
+
+    public int getMaxX() {
+        return maxX;
+    }
+
+    public int getMaxY() {
+        return maxY;
+    }
+
+    public int getMaxZ() {
+        return maxZ;
+    }
+
+    public long getCreatedAtEpochMilli() {
+        return createdAtEpochMilli;
+    }
+
+    public boolean isLocationInside(Location location) {
+        if (location == null || location.getWorld() == null) {
+            return false;
+        }
+        return isLocationInside(location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    public boolean isLocationInside(String worldName, int x, int y, int z) {
+        return this.worldName.equals(worldName)
+                && x >= minX && x <= maxX
+                && y >= minY && y <= maxY
+                && z >= minZ && z <= maxZ;
+    }
+
+    public boolean isOverlap(Location min, Location max) {
+        if (min == null || max == null || min.getWorld() == null || max.getWorld() == null) {
+            return false;
+        }
+        if (!min.getWorld().getName().equals(max.getWorld().getName())) {
+            return false;
+        }
+        return isOverlap(
+                min.getWorld().getName(),
+                min.getBlockX(), min.getBlockY(), min.getBlockZ(),
+                max.getBlockX(), max.getBlockY(), max.getBlockZ());
+    }
+
+    public boolean isOverlap(String worldName, int otherMinX, int otherMinY, int otherMinZ, int otherMaxX, int otherMaxY, int otherMaxZ) {
+        if (!this.worldName.equals(worldName)) {
+            return false;
+        }
+        int normalizedMinX = Math.min(otherMinX, otherMaxX);
+        int normalizedMinY = Math.min(otherMinY, otherMaxY);
+        int normalizedMinZ = Math.min(otherMinZ, otherMaxZ);
+        int normalizedMaxX = Math.max(otherMinX, otherMaxX);
+        int normalizedMaxY = Math.max(otherMinY, otherMaxY);
+        int normalizedMaxZ = Math.max(otherMinZ, otherMaxZ);
+        return !(normalizedMinX > maxX || normalizedMaxX < minX
+                || normalizedMinY > maxY || normalizedMaxY < minY
+                || normalizedMinZ > maxZ || normalizedMaxZ < minZ);
+    }
+
+    public BoundingBox getBoundingBox() {
+        return new BoundingBox(minX, minY, minZ, maxX + 1.0, maxY + 1.0, maxZ + 1.0);
+    }
+
+    public Location getOriginLocation() {
+        World world = getWorld();
+        return world == null ? null : new Location(world, originX, originY, originZ);
+    }
+
+    public Location getMinLocation() {
+        World world = getWorld();
+        return world == null ? null : new Location(world, minX, minY, minZ);
+    }
+
+    public Location getMaxLocation() {
+        World world = getWorld();
+        return world == null ? null : new Location(world, maxX, maxY, maxZ);
     }
 
     public World getWorld() {
-        return BuildingUnitMain.i.getServer().getWorld(world);
+        if (BuildingUnitMain.i == null) {
+            return null;
+        }
+        return BuildingUnitMain.i.getServer().getWorld(worldName);
     }
 
-    public void showInfoMsg(Player p) {
-        p.sendMessage("========UnitInfo Start========");
-        p.sendMessage("name: " + name);
-        p.sendMessage(String.format("Location Min: (%d,%d,%d)", getMinLocation().getBlockX(),
-                getMinLocation().getBlockY(), getMinLocation().getBlockZ()));
-        p.sendMessage(String.format("Location Max: (%d,%d,%d)", getMaxLocation().getBlockX(),
-                getMaxLocation().getBlockY(), getMaxLocation().getBlockZ()));
-        p.sendMessage("========UnitInfo End========");
+    public List<Player> getEveryoneInside() {
+        List<Player> result = new ArrayList<>();
+        World world = getWorld();
+        if (world == null) {
+            return result;
+        }
+        for (Player player : world.getPlayers()) {
+            if (isLocationInside(player.getLocation())) {
+                result.add(player);
+            }
+        }
+        return result;
     }
 
+    public List<Long> getCoveredChunkKeys() {
+        List<Long> keys = new ArrayList<>();
+        for (int chunkX = ChunkKey.toChunk(minX); chunkX <= ChunkKey.toChunk(maxX); chunkX++) {
+            for (int chunkZ = ChunkKey.toChunk(minZ); chunkZ <= ChunkKey.toChunk(maxZ); chunkZ++) {
+                keys.add(ChunkKey.of(chunkX, chunkZ));
+            }
+        }
+        return keys;
+    }
+
+    public void showInfoMsg(Player player) {
+        player.sendMessage("========UnitInfo Start========");
+        player.sendMessage("uuid: " + uuid);
+        player.sendMessage("schematic: " + schematicName);
+        player.sendMessage("world: " + worldName);
+        player.sendMessage(String.format("Origin: (%d,%d,%d)", originX, originY, originZ));
+        player.sendMessage(String.format("Bounds Min: (%d,%d,%d)", minX, minY, minZ));
+        player.sendMessage(String.format("Bounds Max: (%d,%d,%d)", maxX, maxY, maxZ));
+        player.sendMessage("========UnitInfo End========");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UnitInfo unitInfo)) {
+            return false;
+        }
+        return Objects.equals(uuid, unitInfo.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid);
+    }
 }

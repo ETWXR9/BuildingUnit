@@ -1,153 +1,110 @@
-# BuildingUnit-建筑单元API
-## 简介
-在mc各类小游戏活动通常都使用不能修改方块的冒险模式作为游戏规则的基础。然而有的时候，我们希望在小游戏中也能拥有“建筑”的玩法，例如模拟经营、塔防等玩法都依赖于“创建具有功能的建筑”的功能。因此我琢磨了一个简单的插件来为此类功能提供代码基础。
+﻿# BuildingUnit
 
-## 功能
-插件通过调用它的函数，可以做到：
-1. 在服务端将世界中的区域保存为投影文件
-2. 将指定名称的投影粘贴到世界中（可旋转），并存储其信息，生成一个UUID。这个信息被称为“UnitInfo”，即单元信息。包括uuid、名称、位置、大小。
-3. 通过名称、位置等信息检索指定的建筑单元信息，然后进一步利用建筑的信息实现具体游戏玩法。
-4. 删除单元，并清空范围内的方块。
-5. 在单元建筑的边框显示粒子进行提示。
-6. 检测某个位置、某个区域是否在某个单元内部。
-7. 保存、粘贴的事件。
+`BuildingUnit` 是一个面向 Paper 服务端的建筑模板与实例管理插件。
 
-## org.etwxr9.buildingunit.BuildingUnitAPI
-该类提供了常用的功能。
+它提供三类核心能力：
+- 把世界中的方块区域保存为 schematic
+- 把 schematic 粘贴为可追踪、可持久化的 `UnitInfo`
+- 为其他插件提供按位置、名称、UUID、区域的高效查询能力
 
-*   ### 方法详细资料
+插件内部已经维护按 `world + chunk` 的查询索引，适合被小游戏、地块、塔防、模拟经营等需要“建筑单元”概念的插件复用。
 
-    *   ### getPasteRegion
+## 运行要求
 
-        public static com.sk89q.worldedit.regions.CuboidRegion getPasteRegion(org.bukkit.Location location, String name, int rotate)
+- Paper `1.21.11`
+- Java `21`
+- FastAsyncWorldEdit
 
-        取得建筑粘贴的目标区域信息
+## 安装
 
-        参数:
+1. 将 `BuildingUnit` 放入服务端 `plugins/` 目录。
+2. 确保服务器已安装 FastAsyncWorldEdit。
+3. 启动服务器，插件会自动创建数据目录。
 
-        `location` - 源点位置
+## 主要功能
 
-        `name` - 建筑名称
+- 保存 schematic 模板
+- 粘贴 schematic 并生成唯一 `UnitInfo`
+- 删除已放置的建筑单元
+- 查询某个位置所属的单元
+- 查询某个区域内重叠的单元
+- 显示保存范围或粘贴范围的粒子预览
+- 通过 Bukkit 事件与其他插件联动
 
-        `rotate` - 90度逆时针旋转次数
+## 数据文件
 
-        返回:
+插件数据默认保存在 `plugins/BuildingUnit/` 目录下：
 
-    *   ### pasteUnit
+- `Schematic/`：保存的 schematic 文件
+- `units-v2.json`：已放置单元的持久化数据
 
-        public static org.etwxr9.buildingunit.UnitInfo pasteUnit(org.bukkit.Location oriLoc, String name, int rotate)
+每个 `UnitInfo` 会固化保存以下信息：
 
-        粘贴建筑
+- schematic 名称
+- 世界名称
+- 原点坐标
+- 旋转次数
+- 最小/最大边界
+- UUID
+- 创建时间戳
 
-        参数:
+## 命令
 
-        `oriLoc` - 投影源点位置
+权限节点：`buildingunit.admin`
 
-        `name` - 建筑名称
+- `/bu save <name> <sizeX> <sizeY> <sizeZ> [originOffsetX originOffsetY originOffsetZ] [confirm]`
+- `/bu paste <name> <rotate> [ignoreAir] [confirm]`
+- `/bu preview <name> <rotate>`
+- `/bu delete`
+- `/bu info`
+- `/bu reload`
+- `/bu stats`
 
-        `rotate` - 90度逆时针旋转次数
+说明：
 
-        返回:
+- `save` 与 `paste` 默认先显示粒子预览。
+- 只有追加 `confirm` 才会真正执行保存或粘贴。
+- `stats` 会显示 schematic 数量、unit 数量、world 分桶数、chunk 分桶数。
 
-    *   ### deleteUnit
+## 查询能力
 
-        public static void deleteUnit(org.etwxr9.buildingunit.UnitInfo unitInfo)
+运行时会维护以下索引：
 
-        删除建筑并清除对应区域方块
+- `uuid -> UnitInfo`
+- `schematicName -> uuid 集合`
+- `world -> chunk bucket -> uuid 集合`
 
-        参数:
+这意味着：
 
-        `unitInfo` -
+- `getUnit(uuid)` 可以直接命中主索引
+- `getUnitsByName(name)` 不需要全表扫描
+- `getUnit(location)` 只扫描当前位置所在 chunk 的候选单元
+- `getOverlapUnits(...)` 只扫描目标区域覆盖 chunk 的候选单元
 
-    *   ### saveSchematic
+## 对外开发
 
-        public static void saveSchematic(org.bukkit.Location min, org.bukkit.Location max, String name, org.bukkit.Location origin)
+如果你要在其他插件中依赖 `BuildingUnit`，优先使用静态入口类：
 
-        保存投影文件
+- `org.etwxr9.buildingunit.BuildingUnitAPI`
 
-        参数:
+文档见：
 
-        `min` -
+- [API 文档](docs/api.md)
+- [外部依赖接入示例](docs/integration-example.md)
 
-        `max` -
+## 事件
 
-        `name` -
+可用于接入校验、保护区、经济系统、统计逻辑的事件包括：
 
-        `origin` -
-
-    *   ### getUnit
-
-        public static org.etwxr9.buildingunit.UnitInfo getUnit(org.bukkit.Location loc)
-
-        取得指定位置的建筑
-
-        参数:
-
-        `loc` -
-
-        返回:
-
-    *   ### getUnit
-
-        public static org.etwxr9.buildingunit.UnitInfo getUnit(String uuid)
-
-        根据uuid取得建筑信息
-
-        参数:
-
-        `uuid` -
-
-        返回:
-
-    *   ### getUnitsByName
-
-        public static List<org.etwxr9.buildingunit.UnitInfo> getUnitsByName(String name)
-
-        根据名称取得建筑信息
-
-        参数:
-
-        `name` -
-
-        返回:
-
-    *   ### getOverlapUnits
-
-        public static List<org.etwxr9.buildingunit.UnitInfo> getOverlapUnits(org.bukkit.Location min, org.bukkit.Location max)
-
-    *   ### getOverlapUnits
-
-        public static List<org.etwxr9.buildingunit.UnitInfo> getOverlapUnits(com.sk89q.worldedit.regions.CuboidRegion cr)
-
-    *   ### showCubeParticle
-
-        public static void showCubeParticle(org.bukkit.Location loc1, org.bukkit.Location loc2, List<org.bukkit.entity.Player> playerList, int r, int g, int b, int tickInterval, int displayTimeNumber)
-
-        在一个方形区域边缘显示粒子
-
-        参数:
-
-        `loc1` - 最小位置
-
-        `loc2` - 最大位置
-
-        `playerList` - 可以看到粒子的玩家
-
-        `r` -
-
-        `g` -
-
-        `b` -
-
-        `tickInterval` - 每次显示粒子的间隔
-
-        `displayTimeNumber` - 显示粒子的次数
-
-    *   ### showSchematicParticle
-
-        public static void showSchematicParticle(org.bukkit.Location loc, List<org.bukkit.entity.Player> playerList, String name, int r, int g, int b, int tickInterval, int displayTimeNumber, int rotate)
-
-    *   ### showUnitParticle
-
-        public static void showUnitParticle(org.etwxr9.buildingunit.UnitInfo unitInfo, List<org.bukkit.entity.Player> playerList, int r, int g, int b, int tickInterval, int displayTimeNumber)
-
+- `PrePasteUnitEvent`
+- `PostPasteUnitEvent`
+- `PreDeleteUnitEvent`
+- `PostDeleteUnitEvent`
+- `PreSaveSchematicEvent`
+- `PostSaveSchematicEvent`
+
+## 构建
+
+```bash
+mvn test
+```
