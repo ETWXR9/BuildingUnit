@@ -17,11 +17,13 @@ import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldedit.util.gson.BlockVectorAdapter;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.block.BlockState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.etwxr9.buildingunit.event.OnPasteEvent;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class BuildingUnitAPI {
 
@@ -45,6 +48,17 @@ public class BuildingUnitAPI {
         return BuildingUnitMain.i.getClipboards().containsKey(name);
     }
 
+    public static class PasteRegion {
+        public Location minLocation;
+        public Location maxLocation;
+
+        public PasteRegion(Location minLocation, Location maxLocation) {
+            this.minLocation = minLocation;
+            this.maxLocation = maxLocation;
+        }
+
+    }
+
     /**
      * 取得建筑粘贴的目标区域信息
      *
@@ -53,7 +67,21 @@ public class BuildingUnitAPI {
      * @param rotate   90度逆时针旋转次数
      * @return
      */
-    public static CuboidRegion getPasteRegion(Location location, String name, int rotate) {
+    public static PasteRegion getPasteRegion(Location location, String name, int rotate) {
+        var cr = getPasteRegionCR(location, name, rotate);
+        return new PasteRegion(new Location(location.getWorld(), cr.getMinimumX(), cr.getMinimumY(), cr.getMinimumZ()),
+                new Location(location.getWorld(), cr.getMaximumX(), cr.getMaximumY(), cr.getMaximumZ()));
+    }
+
+    /**
+     * 取得建筑粘贴的目标区域信息
+     *
+     * @param location 源点位置
+     * @param name     建筑名称
+     * @param rotate   90度逆时针旋转次数
+     * @return
+     */
+    static CuboidRegion getPasteRegionCR(Location location, String name, int rotate) {
         BlockVector3 to = BukkitAdapter.asBlockVector(location);
         World world = BukkitAdapter.adapt(location.getWorld());
         var clipboard = BuildingUnitMain.i.getClipboards().get(name);
@@ -63,10 +91,16 @@ public class BuildingUnitAPI {
         holder.setTransform(holder.getTransform().combine(new AffineTransform().rotateY(rotate * 90)));
         var region = clipboard.getRegion();
         BlockVector3 clipboardOffset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
-        Vector3 realTo = to.toVector3().add(holder.getTransform().apply(clipboardOffset.toVector3()));
-        Vector3 max = realTo.add(
+        Vector3 realMin = to.toVector3().add(holder.getTransform().apply(clipboardOffset.toVector3()));
+        Vector3 realMax = realMin.add(
                 holder.getTransform().apply(region.getMaximumPoint().subtract(region.getMinimumPoint()).toVector3()));
-        return new CuboidRegion(world, realTo.toBlockPoint(), max.toBlockPoint());
+        var cr = new CuboidRegion(world, realMin.toBlockPoint(), realMax.toBlockPoint());
+        // BuildingUnitMain.i.getLogger().info("realMin: " + realMin.toString());
+        // BuildingUnitMain.i.getLogger().info("realMax: " + realMax.toString());
+        // BuildingUnitMain.i.getLogger()
+        // .info("cr: " + cr.getMinimumPoint().toString() + " " +
+        // cr.getMaximumPoint().toString());
+        return cr;
     }
 
     /**
@@ -77,7 +111,7 @@ public class BuildingUnitAPI {
      * @param rotate 90度逆时针旋转次数
      * @return
      */
-    public static UnitInfo pasteUnit(Location oriLoc, String name, int rotate) {
+    public static UnitInfo pasteUnit(Location oriLoc, String name, int rotate, boolean ignoreAirBlocks) {
         Clipboard clipboard = BuildingUnitMain.i.getClipboards().get(name);
         if (clipboard == null)
             BuildingUnitMain.i.getLogger().warning("Schematic File " + name + " Not Found!");
@@ -102,7 +136,7 @@ public class BuildingUnitAPI {
             }
             Operation operation = ch.createPaste(editSession)// Create a builder using the edit session
                     .to(blockVector3) // Set where you want the paste to go
-                    .ignoreAirBlocks(false) // Tell world edit not to paste air blocks (true/false)
+                    .ignoreAirBlocks(ignoreAirBlocks) // Tell world edit not to paste air blocks (true/false)
                     .build(); // Build the operation
             try {
                 Operations.complete(operation); // This'll complete a operation synchronously until it's finished
@@ -142,6 +176,35 @@ public class BuildingUnitAPI {
                         entity.remove();
                     }
                 });
+            es.setBlocks((Region) region, air);
+            BuildingUnitMain.i.getUnitInfos().remove(unitInfo);
+            BuildingUnitMain.i.SaveUnitInfo();
+        } catch (WorldEditException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteUnit(UnitInfo unitInfo, Predicate<Entity> preserveEntities) {
+        var bv3Min = BukkitAdapter.asBlockVector(unitInfo.getMinLocation());
+        var bv3Max = BukkitAdapter.asBlockVector(unitInfo.getMaxLocation());
+        var w = BukkitAdapter.adapt(unitInfo.getWorld());
+        CuboidRegion region = new CuboidRegion(w, bv3Min, bv3Max);
+        try (EditSession es = WorldEdit.getInstance().newEditSessionBuilder().world(w).build()) {
+            BlockState air = BukkitAdapter.adapt(Material.AIR.createBlockData());
+            // 使用getnearbyentities查找实体
+            var bb = unitInfo.getBoundingBox();
+            var world = unitInfo.getWorld();
+            // 强制加载覆盖到的区块
+            for (int x = (int) bb.getMinX(); x <= bb.getMaxX(); x += 16) {
+                for (int z = (int) bb.getMinZ(); z <= bb.getMaxZ(); z += 16) {
+                    world.getChunkAt(x, z);
+                }
+            }
+            var entities = world.getNearbyEntities(bb);
+            for (var entity : entities) {
+                if (!preserveEntities.test(entity) && !(entity instanceof Player))
+                    entity.remove();
+            }
             es.setBlocks((Region) region, air);
             BuildingUnitMain.i.getUnitInfos().remove(unitInfo);
             BuildingUnitMain.i.SaveUnitInfo();
@@ -262,6 +325,7 @@ public class BuildingUnitAPI {
         // 在边缘处生成粒子
         class Task extends BukkitRunnable {
             private int count = 0;
+
             @Override
             public void run() {
                 for (int x = 0; x < sizeX; x++) {
@@ -293,7 +357,7 @@ public class BuildingUnitAPI {
 
     public static void showSchematicParticle(Location loc, List<Player> playerList, String name,
             int r, int g, int b, int tickInterval, int displayTimeNumber, int rotate) {
-        var cr = getPasteRegion(loc, name, rotate);
+        var cr = getPasteRegionCR(loc, name, rotate);
 
         var vMin = cr.getMinimumPoint();
         var vMax = cr.getMaximumPoint();

@@ -6,7 +6,7 @@
 
     <groupId>org.etwxr9</groupId>
     <artifactId>BuildingUnit</artifactId>
-    <version>v1.21.1-1.0</version>
+    <version>v1.21.1-1.3</version>
     <repositories>
         <repository>
             <id>papermc</id>

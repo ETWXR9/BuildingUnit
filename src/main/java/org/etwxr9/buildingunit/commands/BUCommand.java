@@ -62,7 +62,7 @@ public class BUCommand implements CommandExecutor {
         Player player = (Player) sender;
         // bu paste name rotate confirm
         if (args[3].equals("confirm")) {
-            BuildingUnitAPI.pasteUnit(player.getLocation(), args[1], Integer.parseInt(args[2]));
+            BuildingUnitAPI.pasteUnit(player.getLocation(), args[1], Integer.parseInt(args[2]), false);
         } else {
             BuildingUnitAPI.showSchematicParticle(player.getLocation(), List.of(player),
                     args[1], 255, 0, 0, 20, 10, Integer.parseInt(args[2]));

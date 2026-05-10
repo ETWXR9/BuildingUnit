@@ -5,6 +5,7 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +33,12 @@ public class UnitInfo {
         z = originLocation.getBlockZ();
         this.rotate = rotate;
         this.uuid = uuid.toString();
-        cr = BuildingUnitAPI.getPasteRegion(getOriginLocation(), name, rotate);
+        cr = BuildingUnitAPI.getPasteRegionCR(getOriginLocation(), name, rotate);
     }
 
     public CuboidRegion getCr() {
         if (cr == null) {
-            cr = BuildingUnitAPI.getPasteRegion(getOriginLocation(), name, rotate);
+            cr = BuildingUnitAPI.getPasteRegionCR(getOriginLocation(), name, rotate);
         }
         return cr;
     }
@@ -102,6 +103,10 @@ public class UnitInfo {
         var cr = getCr();
         var maxLoc = cr.getMaximumPoint();
         return new Location(getWorld(), maxLoc.getBlockX(), maxLoc.getBlockY(), maxLoc.getBlockZ());
+    }
+
+    public BoundingBox getBoundingBox() {
+        return BoundingBox.of(getMinLocation(), getMaxLocation());
     }
 
     /**
